@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<przepisy>
+	<przepis> 
+		<nazwa>Ser z makiem</nazwa>
+		<skladnik>ser</skladnik>
+		<skladnik>mak</skladnik>
+		<skladnik>miod</skladnik>
+		<skladnik>orzechy</skladnik>
+		<skladnik>rodzynki</skladnik>
+		<wykonanie>Ugotuj mak i dodaj resztę skladników</wykonanie>
+	</przepis>
+</przepisy>
