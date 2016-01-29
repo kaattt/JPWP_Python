@@ -18,13 +18,16 @@ def getCountry(country):
 	page.close()
 
 	soup = BeautifulSoup(htmlSource, "html.parser")
-	x = soup.select('div#mw-content-text > p')
+	x = soup.find_all("div", {"id": "mw-content-text"})
 
 	formatted_child = " "
 	
 	for child in x:
 		formatted_child += child.getText().encode('utf-8') + "\n"
 	return formatted_child
+
+#def getFlag
+#	page = 
 
 def splitIntoSentences(text):
 	# Dzielę całość tekstu na zdania
@@ -34,7 +37,7 @@ def splitIntoSentences(text):
 def getTag(All):
 	Tab = []
 	for zdanie in All:
-		if (zdanie.search(" " +tag+ " ") !=-1):
+		if (zdanie.find(" " +tag+ " ") !=-1):
 			Tab.append(zdanie)
 
 	# 3. Wyświetlam wynik, w ładny i przejrzysty sposób:
@@ -47,6 +50,26 @@ def getTag(All):
 		print licznik, ". ", trafienie
 		# np. 1. Przykładowe zdanie w którym jest tag ,"," oznacza pisanie w jednej linii
 
+def databaseCheck(client, countryName):
+    # wybieram bazę
+    db = client['test-database']
+
+    # decyzja, czy czytać z bazy czy z internetu
+    if db.mytable.find_one({"country" : countryName}):
+        # jeśli znajdzie w bazie to wczytaj
+        print "Znaleziono w bazie, wczytuję:"
+        record = db.mytable.find_one({"country" : countryName})
+        return record["info"]
+    else:
+        print "Nie znaleziono w bazie, pobieram z sieci:"
+        info = getCountry(countryName)
+        jsonInput = {
+            "country" : countryName,
+            "info" : info
+        }
+        db.mytable.insert_one(jsonInput)
+        print "Zapisano do bazy"
+        return jsonInput["info"]
 
 
 
@@ -54,4 +77,4 @@ client = MongoClient()
 
 info = databaseCheck(client, country)
 zdania = splitIntoSentences(info)
-findTag(zdania)
+getTag(zdania)
