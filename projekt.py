@@ -6,7 +6,14 @@ import re
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from sgmllib import SGMLParser
-#import sgmllib
+import requests
+import json
+
+import tornado.httpserver
+import tornado.ioloop
+import tornado.web
+
+
 
 country = raw_input("Enter the country: ")
 tag = raw_input("Enter the tag: ")
@@ -26,8 +33,14 @@ def getCountry(country):
 		formatted_child += child.getText().encode('utf-8') + "\n"
 	return formatted_child
 
-#def getFlag
-#	page = 
+def getFlagURL(country):
+
+	page = "https://en.wikipedia.org/wiki/File:Flag_of_" +country+".svg"
+	
+	urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', page)
+	print urls
+	return urls
+
 
 def splitIntoSentences(text):
 	# Dzielę całość tekstu na zdania
@@ -78,3 +91,36 @@ client = MongoClient()
 info = databaseCheck(client, country)
 zdania = splitIntoSentences(info)
 getTag(zdania)
+getFlagURL(country)
+
+
+#http://www.python.rk.edu.pl/w/p/tornado-framework-z-obsluga-asynchronicznych-zadan/
+# klasa-widok
+class MainHandler(tornado.web.RequestHandler):
+	def post(self):
+		payload = {	'address': 'localhost',          #adres na który naleŜy przesłać odpowiedź, np. localhost 
+       				'port': '8888',                  #port na który naleŜy przesłać, np. 9091 
+       				'type': 'text',                  #typ zapytania; 'text' lub 'image' 
+       				'content': ["country", "tag"] }    	 #treść zapytania  
+		r = requests.post("http://localhost:8888", params=payload)
+#r.json()
+
+#		print r.url
+
+		self.write(""+country+"")
+		self.finish()
+
+
+# mapowanie URLi
+application = tornado.web.Application([(r"/", MainHandler),])
+
+
+
+		
+
+
+if __name__ == "__main__":
+	http_server = tornado.httpserver.HTTPServer(application)
+	http_server.listen(8888)
+	tornado.ioloop.IOLoop.instance().start()
+
