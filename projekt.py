@@ -64,25 +64,25 @@ def getTag(All):
 		# np. 1. Przykładowe zdanie w którym jest tag ,"," oznacza pisanie w jednej linii
 
 def databaseCheck(client, countryName):
-    # wybieram bazę
-    db = client['test-database']
 
-    # decyzja, czy czytać z bazy czy z internetu
-    if db.mytable.find_one({"country" : countryName}):
-        # jeśli znajdzie w bazie to wczytaj
-        print "Znaleziono w bazie, wczytuję:"
-        record = db.mytable.find_one({"country" : countryName})
-        return record["info"]
-    else:
-        print "Nie znaleziono w bazie, pobieram z sieci:"
-        info = getCountry(countryName)
-        jsonInput = {
-            "country" : countryName,
-            "info" : info
-        }
-        db.mytable.insert_one(jsonInput)
-        print "Zapisano do bazy"
-        return jsonInput["info"]
+	#http://api.mongodb.org/python/current/tutorial.html
+	# wybieram bazę
+	db = client['test-database']
+
+	# decyzja, czy czytać z bazy czy z internetu
+	if db.mytable.find_one({"country" : countryName}):
+		# jeśli znajdzie w bazie to wczytaj
+		print "Znaleziono w bazie, wczytuję:"
+		record = db.mytable.find_one({"country" : countryName})
+		return record["info"]
+	else:
+		print "Nie znaleziono w bazie, pobieram z sieci:"
+		info = getCountry(countryName)
+		jsonInput = {	"country" : countryName,
+						"info" : info}
+		db.mytable.insert_one(jsonInput)
+		print "Zapisano do bazy"
+		return jsonInput["info"]
 
 
 
@@ -98,17 +98,26 @@ getFlagURL(country)
 # klasa-widok
 class MainHandler(tornado.web.RequestHandler):
 	def post(self):
-		payload = {	'address': 'localhost',          #adres na który naleŜy przesłać odpowiedź, np. localhost 
-       				'port': '8888',                  #port na który naleŜy przesłać, np. 9091 
-       				'type': 'text',                  #typ zapytania; 'text' lub 'image' 
-       				'content': ["country", "tag"] }    	 #treść zapytania  
-		r = requests.post("http://localhost:8888", params=payload)
-#r.json()
+		data = self.get_argument('body', 'No data received')
+		self.write(data)
 
-#		print r.url
-
-		self.write(""+country+"")
+	def on_response(self, response):
+		if response.error: raise tornado.web.HTTPError(500)
+		json = tornado.escape.json_decode(response.body)
+		self.write("Fetched " + str(len(json["entries"])) + "entries"
+				   "from the FriendFeed API")
 		self.finish()
+
+
+	   
+#		payload = {	'address': 'localhost',          #adres na który naleŜy przesłać odpowiedź, np. localhost 
+#       				'port': '8888',                  #port na który naleŜy przesłać, np. 9091 
+#       				'type': 'text',                  #typ zapytania; 'text' lub 'image' 
+#       				'content': ["country", "tag"] }    	 #treść zapytania  
+#		r = requests.post("http://localhost:8888", params=payload)
+
+#		self.write(""+country+"")
+#		self.finish()
 
 
 # mapowanie URLi
