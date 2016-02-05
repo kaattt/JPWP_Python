@@ -15,7 +15,7 @@ import tornado.web
 
 import json
 import traceback
-
+import pprint
 
 client = MongoClient()
 
@@ -62,6 +62,8 @@ def getTagInfo(tag,All):
 		licznik += 1 # zwiększam o 1, żeby wyświetlanie miało charakter listy od 1...itp
 		print licznik, ". ", trafienie
 		# np. 1. Przykładowe zdanie w którym jest tag ,"," oznacza pisanie w jednej linii
+	return Tab
+
 
 def databaseCheck(client, countryName):
 
@@ -98,9 +100,10 @@ class MainHandler(tornado.web.RequestHandler):
 			if countryFound:
 				country = countryFound.group(1)
 
-				info = databaseCheck(client, country)
+				info = databaseCheck(client, country)#
+#				pprint(info)
 				zdania = splitIntoSentences(info)
-				getTagInfo(zdania)
+				getTagInfo(tag, zdania)
 #			print 'Country: ' + country 
 			
 				if tagFound:
@@ -127,4 +130,4 @@ if __name__ == "__main__":
 #info = databaseCheck(client, country)
 #zdania = splitIntoSentences(info)
 #getTagInfo(zdania)
-getFlagURL(country)
+#getFlagURL(country)
