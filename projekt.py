@@ -17,6 +17,8 @@ import json
 import traceback
 
 
+client = MongoClient()
+
 def getCountryInfo(country):
 	page = urllib2.urlopen("http://en.wikipedia.org/wiki/" +country)
 	htmlSource = page.read()
@@ -95,11 +97,15 @@ class MainHandler(tornado.web.RequestHandler):
 			
 			if countryFound:
 				country = countryFound.group(1)
-			print 'Country: ' + country 
+
+				info = databaseCheck(client, country)
+				zdania = splitIntoSentences(info)
+				getTagInfo(zdania)
+#			print 'Country: ' + country 
 			
-			if tagFound:
-				tag = tagFound.group(1)
-			print 'TAG: ' + tag 
+				if tagFound:
+					tag = tagFound.group(1)
+				print 'TAG: ' + tag 
 			
 			self.write(data_json)
 			#print (data_json)
@@ -118,9 +124,7 @@ if __name__ == "__main__":
 
 
 
-client = MongoClient()
-
-info = databaseCheck(client, country)
-zdania = splitIntoSentences(info)
-getTagInfo(zdania)
+#info = databaseCheck(client, country)
+#zdania = splitIntoSentences(info)
+#getTagInfo(zdania)
 getFlagURL(country)
