@@ -84,7 +84,7 @@ def databaseCheck(client, countryName):
 						"info" : info}
 		db.mytable.insert_one(jsonInput)
 		print "Zapisano do bazy"
-		return jsonInput["info"]
+		return info
 
 #http://www.python.rk.edu.pl/w/p/tornado-framework-z-obsluga-asynchronicznych-zadan/
 # klasa-widok
@@ -108,8 +108,9 @@ class MainHandler(tornado.web.RequestHandler):
 
 				if tagFound:
 					tag = tagFound.group(1)
-					zdania = getTagInfo(tag, zdania)
 					print 'TAG: ' + tag 
+					zdania = getTagInfo(tag, zdania)
+					
 			
 #			self.write(data_json)
 			self.write(tornado.escape.json_encode(zdania))
