@@ -82,9 +82,10 @@ def databaseCheck(client, countryName):
 		info = getCountryInfo(countryName)
 		jsonInput = {	"country" : countryName,
 						"info" : info}
-		db.mytable.insert_one(jsonInput)
-		print "Zapisano do bazy"
-		return info
+		result = db.mytable.insert_one(jsonInput)
+		record = db.mytable.find_one({"country" : countryName})
+		
+		return record["info"]
 
 #http://www.python.rk.edu.pl/w/p/tornado-framework-z-obsluga-asynchronicznych-zadan/
 # klasa-widok
