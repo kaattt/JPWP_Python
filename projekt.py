@@ -7,16 +7,16 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from sgmllib import SGMLParser
 import requests
-import json
+
 
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 
+import json
+import traceback
 
 
-country = raw_input("Enter the country: ")
-tag = raw_input("Enter the tag: ")
 
 
 def getCountry(country):
@@ -84,6 +84,40 @@ def databaseCheck(client, countryName):
 		print "Zapisano do bazy"
 		return jsonInput["info"]
 
+#http://www.python.rk.edu.pl/w/p/tornado-framework-z-obsluga-asynchronicznych-zadan/
+# klasa-widok
+class MainHandler(tornado.web.RequestHandler):
+	def post(self):
+		# dodałem obsługę błędów parsowania JSON....
+		try:
+			data_json = tornado.escape.json_decode(self.request.body)
+			content = data_json['content']
+			countryFound = re.search("country\((.+?)\)", content)
+			tagFound = re.search("tag\((.+?)\)", content)
+			
+			if countryFound:
+				country = countryFound.group(1)
+			print 'Country: ' + country 
+			
+			if tagFound:
+				tag = tagFound.group(1)
+			print 'TAG: ' + tag 
+			
+			self.write(data_json)
+			#print (data_json)
+		except Exception, e:
+			self.write(json.dumps({'status': 'fail', 'error': "Error occured:\n%s" % traceback.format_exc()}))
+
+
+# mapowanie URLi
+application = tornado.web.Application([(r"/", MainHandler),], debug=True)	
+
+
+if __name__ == "__main__":
+	http_server = tornado.httpserver.HTTPServer(application)
+	http_server.listen(8888)
+	tornado.ioloop.IOLoop.instance().start()
+
 
 
 client = MongoClient()
@@ -92,44 +126,3 @@ info = databaseCheck(client, country)
 zdania = splitIntoSentences(info)
 getTag(zdania)
 getFlagURL(country)
-
-
-#http://www.python.rk.edu.pl/w/p/tornado-framework-z-obsluga-asynchronicznych-zadan/
-# klasa-widok
-class MainHandler(tornado.web.RequestHandler):
-	def post(self):
-		data = self.get_argument('body', 'No data received')
-		self.write(data)
-
-	def on_response(self, response):
-		if response.error: raise tornado.web.HTTPError(500)
-		json = tornado.escape.json_decode(response.body)
-		self.write("Fetched " + str(len(json["entries"])) + "entries"
-				   "from the FriendFeed API")
-		self.finish()
-
-
-	   
-#		payload = {	'address': 'localhost',          #adres na który naleŜy przesłać odpowiedź, np. localhost 
-#       				'port': '8888',                  #port na który naleŜy przesłać, np. 9091 
-#       				'type': 'text',                  #typ zapytania; 'text' lub 'image' 
-#       				'content': ["country", "tag"] }    	 #treść zapytania  
-#		r = requests.post("http://localhost:8888", params=payload)
-
-#		self.write(""+country+"")
-#		self.finish()
-
-
-# mapowanie URLi
-application = tornado.web.Application([(r"/", MainHandler),])
-
-
-
-		
-
-
-if __name__ == "__main__":
-	http_server = tornado.httpserver.HTTPServer(application)
-	http_server.listen(8888)
-	tornado.ioloop.IOLoop.instance().start()
-
