@@ -103,16 +103,16 @@ class MainHandler(tornado.web.RequestHandler):
 			
 
 				info = databaseCheck(client, country)#
-#				pprint(info)
 				zdania = splitIntoSentences(info)
 
 
 				if tagFound:
 					tag = tagFound.group(1)
-					getTagInfo(tag, zdania)
+					zdania = getTagInfo(tag, zdania)
 					print 'TAG: ' + tag 
 			
-			self.write(data_json)
+#			self.write(data_json)
+			self.write(tornado.escape.json_encode(zdania))
 			#print (data_json)
 		except Exception, e:
 			self.write(json.dumps({'status': 'fail', 'error': "Error occured:\n%s" % traceback.format_exc()}))
@@ -126,10 +126,3 @@ if __name__ == "__main__":
 	http_server = tornado.httpserver.HTTPServer(application)
 	http_server.listen(8888)
 	tornado.ioloop.IOLoop.instance().start()
-
-
-
-#info = databaseCheck(client, country)
-#zdania = splitIntoSentences(info)
-#getTagInfo(zdania)
-#getFlagURL(country)
