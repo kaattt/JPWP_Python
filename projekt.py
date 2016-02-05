@@ -17,9 +17,7 @@ import json
 import traceback
 
 
-
-
-def getCountry(country):
+def getCountryInfo(country):
 	page = urllib2.urlopen("http://en.wikipedia.org/wiki/" +country)
 	htmlSource = page.read()
 	page.close()
@@ -47,7 +45,7 @@ def splitIntoSentences(text):
 	zdania = re.split(r'(?<!\w\. \w.)(?<![A-Z][a-z]\.)(?<=\.|\?)(\s|\[[0-9]{2}\]|\[[0-9]{3}\]|\[[0-9]{2}\]\[[0-9]{2}\]|\[[0-9]{3}\]\[[0-9]{3}\])(?=[A-Z]|\n|\s)', text)
 	return zdania
 
-def getTag(All):
+def getTagInfo(tag,All):
 	Tab = []
 	for zdanie in All:
 		if (zdanie.find(" " +tag+ " ") !=-1):
@@ -77,7 +75,7 @@ def databaseCheck(client, countryName):
 		return record["info"]
 	else:
 		print "Nie znaleziono w bazie, pobieram z sieci:"
-		info = getCountry(countryName)
+		info = getCountryInfo(countryName)
 		jsonInput = {	"country" : countryName,
 						"info" : info}
 		db.mytable.insert_one(jsonInput)
@@ -124,5 +122,5 @@ client = MongoClient()
 
 info = databaseCheck(client, country)
 zdania = splitIntoSentences(info)
-getTag(zdania)
+getTagInfo(zdania)
 getFlagURL(country)
