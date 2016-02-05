@@ -99,16 +99,18 @@ class MainHandler(tornado.web.RequestHandler):
 			
 			if countryFound:
 				country = countryFound.group(1)
+				print 'Country: ' + country 
+			
 
 				info = databaseCheck(client, country)#
 #				pprint(info)
 				zdania = splitIntoSentences(info)
-				getTagInfo(tag, zdania)
-#			print 'Country: ' + country 
-			
+
+
 				if tagFound:
 					tag = tagFound.group(1)
-				print 'TAG: ' + tag 
+					getTagInfo(tag, zdania)
+					print 'TAG: ' + tag 
 			
 			self.write(data_json)
 			#print (data_json)
